@@ -9,11 +9,14 @@ import {
 import SearchBar from '../components/SearchBar';
 import FloatingActionButton from '../components/FloatingActionButton';
 
+import { useRouter } from 'expo-router';
+
 const HomeScreen = () => {
+  const router = useRouter(); // Initialize router
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleCapturePress = () => {
-    Alert.alert('Capture', 'Camera functionality will be implemented here!');
+    router.push('/capture'); // Navigate to the capture stack screen
   };
 
   const handleSearch = (query) => {
