@@ -4,15 +4,18 @@ import {
   Text, 
   StyleSheet, 
   StatusBar,
-  Alert 
+  Alert,
+  TouchableOpacity
 } from 'react-native';
 import SearchBar from '../components/SearchBar';
 import FloatingActionButton from '../components/FloatingActionButton';
-
 import { useRouter } from 'expo-router';
+import { useDrawer } from '../components/SimpleDrawer';
+import { Ionicons } from '@expo/vector-icons';
 
 const HomeScreen = () => {
   const router = useRouter(); // Initialize router
+  const { toggleDrawer } = useDrawer();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleCapturePress = () => {
@@ -28,7 +31,12 @@ const HomeScreen = () => {
       <StatusBar barStyle="light-content" backgroundColor="#1A1A1A" />
       
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Essential</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity onPress={toggleDrawer} style={styles.menuButton}>
+            <Ionicons name="menu" size={28} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Essential</Text>
+        </View>
         <Text style={styles.headerSubtitle}>Visual memories</Text>
       </View>
       
@@ -66,11 +74,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#1A1A1A',
     marginTop: 20,
   },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   headerTitle: {
     fontSize: 32,
     fontWeight: '300',
     color: '#FFFFFF',
     letterSpacing: 0.5,
+  },
+  menuButton: {
+    padding: 5,
+    marginRight: 15,
+    marginLeft: -5, // Negative margin to align icon with padding
   },
   headerSubtitle: {
     fontSize: 14,
