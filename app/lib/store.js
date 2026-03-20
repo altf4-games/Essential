@@ -1,24 +1,29 @@
-import { configureStore, createSlice } from '@reduxjs/toolkit';
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 
 // --- Memories Slice ---
 const memoriesSlice = createSlice({
-  name: 'memories',
+  name: "memories",
   initialState: {
     memories: [],
-    filter: 'all', // 'all', 'recent', 'tagged'
+    filter: "all", // 'all', 'recent', 'tagged'
   },
   reducers: {
     addMemory: (state, action) => {
       state.memories.unshift({
-        id: Date.now().toString(),
+        id: action.payload.id || Date.now().toString(),
         imageUri: action.payload.imageUri || null,
-        summary: action.payload.summary || '',
+        summary: action.payload.summary || "",
         tags: action.payload.tags || [],
-        createdAt: new Date().toISOString(),
+        reminderAt: action.payload.reminderAt || null,
+        reminderNote: action.payload.reminderNote || "",
+        createdAt: action.payload.createdAt || new Date().toISOString(),
       });
     },
+    setMemories: (state, action) => {
+      state.memories = action.payload || [];
+    },
     removeMemory: (state, action) => {
-      state.memories = state.memories.filter(m => m.id !== action.payload);
+      state.memories = state.memories.filter((m) => m.id !== action.payload);
     },
     clearAll: (state) => {
       state.memories = [];
@@ -29,7 +34,8 @@ const memoriesSlice = createSlice({
   },
 });
 
-export const { addMemory, removeMemory, clearAll, setFilter } = memoriesSlice.actions;
+export const { addMemory, removeMemory, clearAll, setFilter, setMemories } =
+  memoriesSlice.actions;
 
 // --- Store ---
 const store = configureStore({

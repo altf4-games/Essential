@@ -1,14 +1,52 @@
 import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../lib/ThemeContext';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearAll } from '../lib/store';
+import { clearMemoriesTable } from '../../services/memorySqlite';
+import { clearMinimalAppData, getMinimalAppData } from '../../services/appStorage';
 
 export default function SettingsScreen() {
   const theme = useTheme();
   const dispatch = useDispatch();
   const memoryCount = useSelector(state => state.memories.memories.length);
+  const [appMeta, setAppMeta] = useState({
+    lastSavedSummary: '',
+    lastSavedAt: null,
+    totalSaved: 0,
+  });
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadMeta() {
+      const data = await getMinimalAppData();
+      if (mounted) {
+        setAppMeta(data);
+      }
+    }
+
+    loadMeta();
+    return () => {
+      mounted = false;
+    };
+  }, [memoryCount]);
+
+  const handleClearAll = async () => {
+    try {
+      await clearMemoriesTable();
+      await clearMinimalAppData();
+      setAppMeta({
+        lastSavedSummary: '',
+        lastSavedAt: null,
+        totalSaved: 0,
+      });
+      dispatch(clearAll());
+    } catch {
+      dispatch(clearAll());
+    }
+  };
 
   const SettingItem = ({ icon, title, type, value, onValueChange, subtitle }) => (
     <View style={styles.settingItem}>
@@ -93,7 +131,24 @@ export default function SettingsScreen() {
             </View>
           </View>
         </View>
-        <TouchableOpacity onPress={() => dispatch(clearAll())}>
+        <View style={styles.settingItem}> 
+          <View style={styles.settingLeft}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.card }]}>
+              <Ionicons name="save" size={22} color={theme.text} />
+            </View>
+            <View>
+              <Text style={[styles.settingTitle, { color: theme.text }]}>AsyncStorage (Minimal)</Text>
+              <Text style={[styles.settingSubtitle, { color: theme.subtitle }]}>Total saved: {appMeta.totalSaved || 0}</Text>
+              <Text style={[styles.settingSubtitle, { color: theme.subtitle }]} numberOfLines={1}>
+                Last summary: {appMeta.lastSavedSummary || 'None'}
+              </Text>
+              <Text style={[styles.settingSubtitle, { color: theme.subtitle }]}>
+                Last saved at: {appMeta.lastSavedAt ? new Date(appMeta.lastSavedAt).toLocaleString() : 'Not yet'}
+              </Text>
+            </View>
+          </View>
+        </View>
+        <TouchableOpacity onPress={handleClearAll}>
           <Text style={styles.clearAll}>Clear All Memories</Text>
         </TouchableOpacity>
       </View>
