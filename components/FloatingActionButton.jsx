@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -8,7 +8,25 @@ const FloatingActionButton = ({
   label = 'Capture' 
 }) => {
   const [pressed, setPressed] = useState(false);
-  const scaleValue = new Animated.Value(1);
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const opacityValue = useRef(new Animated.Value(0)).current;
+  const translateYValue = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacityValue, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(translateYValue, {
+        toValue: 0,
+        friction: 5,
+        tension: 40,
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
 
   const handlePressIn = () => {
     setPressed(true);
@@ -35,7 +53,13 @@ const FloatingActionButton = ({
   return (
     <Animated.View style={[
       styles.container,
-      { transform: [{ scale: scaleValue }] }
+      { 
+        opacity: opacityValue,
+        transform: [
+          { scale: scaleValue },
+          { translateY: translateYValue }
+        ] 
+      }
     ]}>
       <TouchableOpacity
         style={styles.button}

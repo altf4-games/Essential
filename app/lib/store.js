@@ -17,6 +17,7 @@ const memoriesSlice = createSlice({
         reminderAt: action.payload.reminderAt || null,
         reminderNote: action.payload.reminderNote || "",
         createdAt: action.payload.createdAt || new Date().toISOString(),
+        location: action.payload.location || null,
       });
     },
     setMemories: (state, action) => {

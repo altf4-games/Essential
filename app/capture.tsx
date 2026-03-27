@@ -8,7 +8,9 @@ import {
   ScrollView,
   Alert,
   Image,
+  Animated,
 } from "react-native";
+import { useRef } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
@@ -19,6 +21,7 @@ import { File } from "expo-file-system";
 import { generateGeminiImageSummary } from "../services/api";
 import { getAllMemories, insertMemory } from "../services/memorySqlite";
 import { updateAfterMemorySaved } from "../services/appStorage";
+import * as Location from "expo-location";
 
 // --- useReducer: manages multi-step capture form ---
 const initialState = {
@@ -29,6 +32,7 @@ const initialState = {
   tagInput: "",
   reminderAt: "",
   reminderNote: "",
+  locationStr: "",
 };
 
 function captureReducer(state, action) {
@@ -43,6 +47,8 @@ function captureReducer(state, action) {
       return { ...state, reminderAt: action.payload };
     case "SET_REMINDER_NOTE":
       return { ...state, reminderNote: action.payload };
+    case "SET_LOCATION":
+      return { ...state, locationStr: action.payload };
     case "ADD_TAG":
       if (!state.tagInput.trim() || state.tags.includes(state.tagInput.trim()))
         return state;
@@ -69,6 +75,8 @@ export default function CaptureScreen() {
   const reduxDispatch = useDispatch();
   const router = useRouter();
   const theme = useTheme();
+
+  const submitScale = useRef(new Animated.Value(1)).current;
 
   const inferMimeTypeFromUri = (uri) => {
     const lower = (uri || "").toLowerCase();
@@ -120,7 +128,25 @@ export default function CaptureScreen() {
 
     dispatch({ type: "SET_IMAGE", payload: asset.uri });
     dispatch({ type: "SET_SUMMARY", payload: "" });
+    dispatch({ type: "SET_LOCATION", payload: "Fetching location..." });
     setIsGeneratingSummary(true);
+
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const loc = await Location.getCurrentPositionAsync({});
+          dispatch({ 
+            type: "SET_LOCATION", 
+            payload: `${loc.coords.latitude.toFixed(4)}, ${loc.coords.longitude.toFixed(4)}` 
+          });
+        } else {
+          dispatch({ type: "SET_LOCATION", payload: "Permission denied" });
+        }
+      } catch (e) {
+        dispatch({ type: "SET_LOCATION", payload: "Unavailable" });
+      }
+    })();
 
     try {
       const base64Data = await readImageBase64(asset.uri);
@@ -262,6 +288,7 @@ export default function CaptureScreen() {
       reminderAt: normalizedReminderAt,
       reminderNote: state.reminderNote.trim(),
       createdAt: new Date().toISOString(),
+      location: state.locationStr === "Fetching location..." || state.locationStr === "Unavailable" || state.locationStr === "Permission denied" ? null : state.locationStr,
     };
 
     try {
@@ -475,13 +502,39 @@ export default function CaptureScreen() {
           }
         />
 
+        <Text style={[styles.label, { color: theme.subtitle }]}>
+          LOCATION
+        </Text>
+        <TextInput
+          style={[
+            styles.tagInput,
+            styles.reminderInput,
+            {
+              backgroundColor: theme.card,
+              color: theme.subtitle,
+              borderColor: theme.border,
+            },
+          ]}
+          value={state.locationStr}
+          editable={false}
+        />
+
         {/* Submit */}
-        <TouchableOpacity
-          style={[styles.submitBtn, { backgroundColor: theme.accent }]}
-          onPress={handleSubmit}
-        >
-          <Text style={styles.submitText}>Save Memory</Text>
-        </TouchableOpacity>
+        <Animated.View style={{ transform: [{ scale: submitScale }], marginBottom: 40 }}>
+          <TouchableOpacity
+            style={[styles.submitBtn, { backgroundColor: theme.accent, marginBottom: 0 }]}
+            onPress={handleSubmit}
+            activeOpacity={0.9}
+            onPressIn={() => {
+              Animated.spring(submitScale, { toValue: 0.95, useNativeDriver: true }).start();
+            }}
+            onPressOut={() => {
+              Animated.spring(submitScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }).start();
+            }}
+          >
+            <Text style={styles.submitText}>Save Memory</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </ScrollView>
     );
   }
