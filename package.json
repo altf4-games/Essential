@@ -9,7 +9,17 @@
     "web": "expo start --web",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "build:android:preview": "eas build --platform android --profile preview",
+    "build:android:production": "eas build --platform android --profile production",
+    "build:ios:production": "eas build --platform ios --profile production",
+    "build:all": "eas build --platform all --profile production",
+    "submit:android": "eas submit --platform android --latest",
+    "submit:ios": "eas submit --platform ios --latest",
+    "submit:all": "eas submit --platform all --latest",
+    "credentials": "eas credentials",
+    "build:view": "eas build:view",
+    "build:list": "eas build:list"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

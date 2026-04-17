@@ -1,33 +1,68 @@
 {
   "expo": {
-    "name": "essential",
-    "slug": "essential",
+    "name": "Essential",
+    "slug": "essential-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "description": "A mobile app for capturing, summarizing, and organizing memories using AI",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.essential",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Essential needs access to your photo library to capture and summarize memories",
+        "NSCameraUsageDescription": "Essential needs camera access to capture photos for memory summarization",
+        "NSLocationWhenInUseUsageDescription": "Essential needs location access to enhance memory context"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.example.essential",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Essential - Memory App"
     },
     "plugins": [
       "expo-router",
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "geminiApiKey": "USE_ENV_VAR_EXPO_PUBLIC_GEMINI_API_KEY",
+      "router": {},
+      "eas": {
+        "projectId": "a8486c41-104e-4d37-8b6b-8b82e85f09cc"
+      }
+    },
+    "owner": "pradyum_m"
   }
 }
